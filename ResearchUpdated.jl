@@ -502,6 +502,82 @@ function DCpickdegree(arr, degree, n)
 	return sort(holder, by = x->x.x+x.xi)
 end
 
+# ╔═╡ 24db735f-0186-4b57-9932-6979b00b9d6e
+function TruncDCTaylor(arr, crankTermy, n)  #truncate when degree > 2n, see immediate 											hopefully because can run faster. 
+	result = []
+	for termy in arr
+		a = crankTermy.a
+		q = crankTermy.x
+		r = crankTermy.xi 
+		i = 0
+		newA = termy.a
+		x = termy.x
+		xi = termy.xi
+		while i < n 
+			newA = newA * ((a*(r-1)*(x)-a*(q+1)*(xi))/(2*(q+1)))
+			x+= q
+			xi += (r-2)
+			if (x+xi) > 2*n #break if too high degree 
+				break
+			end
+			i+=1
+			newA = newA/i
+			push!(result, term(newA,x,xi))
+		end
+	end
+	
+	if length(result) == 0 
+		print("Lenght resutlt was 0")
+		return arr
+	end
+	final = add(arr,result)
+	final = sort(final, by=x->x.x+x.xi)
+	return final
+end
+
+
+# ╔═╡ 5d8f4663-90eb-4f5e-a817-a39c61102cf6
+function TruncDCcrankThat(arr, degree, n) #Assuming you can do one at a time
+	allTermsofThisDegree = []
+	for termy in arr
+		if termy.xi == 2 && degree == 2
+			continue
+		end
+		if termy.x == degree 
+			continue
+		end
+		if termy.x + termy.xi == degree && termy.x < degree 
+			push!(allTermsofThisDegree, termy)
+		end
+	end
+	FinalArray = arr
+	for CrankTermy in allTermsofThisDegree
+		FinalArray = TruncDCTaylor(FinalArray, CrankTermy, n)
+	end
+	if length(FinalArray) == 0
+		return filter((x)-> !isnothing(x) && x.a != 0 , Arr)
+	else 
+		return filter((x)-> !isnothing(x), FinalArray)
+	end
+end
+
+
+# ╔═╡ c25781a6-e3bc-4cb7-98be-31112db65e18
+function TruncDCpickdegree(arr, degree, n)
+	if degree == 0
+		return arr
+	end
+	i = 1
+	holder = TruncDCcrankThat(arr,i,n)
+	i+=1
+	while i<= degree
+		holder = TruncDCcrankThat(holder,i,n)
+		i+=1
+	end
+	holder = filter((x)-> !isnothing(x) && x.a != 0, holder)
+	return sort(holder, by = x->x.x+x.xi)
+end
+
 # ╔═╡ c342c6f1-5737-4617-9341-332ed6cfcdef
 function Main()
 	# Build your terms here, term(coeficient, x degree, xi degree)
@@ -568,7 +644,7 @@ end
 
 
 # ╔═╡ f22cde20-e89c-4e09-b19d-75235d59983d
-function Main5()
+function Main5() 
 	# Build your terms here, term(coeficient, x degree, xi degree)
 	C = term(1,0,2)
 	A = term(2,1,1)
@@ -584,10 +660,10 @@ function Main5()
 	#p = DCTaylor(arr, B, 9)
 	#p2 = DCTaylor(arr, B, 10)
 	#Poly(p2)
-	p= DCpickdegree(arr, 4,1000)
-	Poly(p)
+	p= TruncDCpickdegree(arr, 7,6)
+	#Poly(p)
 	#Poly(arr)
-	#Poly(lastnterms(p, 30))
+	Poly(lastnterms(p, 30))
 end
 
 
@@ -595,24 +671,25 @@ end
 Main5() #New function 
 
 # ╔═╡ 0482deeb-e496-4b7e-b55e-2120f4f23b95
-function Main4()
+function Main4() # example with the H = -cos(\xi) example  
 	# Build your terms here, term(coeficient, x degree, xi degree)
-	A = term(1,0,2)
-	B = term(1,4,0)
-	C = term(1000,2,4)
-	#D = term(1,2,4)
+	C = term(1,0,2)
+	A = term(1,4,0)
+	B = term(1,0,4)	
+	D = term(4,3, 1)
+	E = term(6,2,2)
+	F = term(4,1,3)
+
 	
 	#assemble it into an array 
-	arr = [A,B,C]
-	DegreeofC = C.x+C.xi
-	#input your function(array, degree you want to push past, number of taylor expansions terms)
-	
+	arr = [C,A,B,D,E,F]
+	#p = DCTaylor(arr, B, 9)
+	#p2 = DCTaylor(arr, B, 10)
+	#Poly(p2)
+	p= DCpickdegree(arr, 4,9)
+	#Poly(p)
 	#Poly(arr)
-	p = youPick2n(arr, DegreeofC, 20 )
-	Poly(lastnterms(p, 10))
-	#Poly(p)    #this function hurts the computer but shows everything 
-	#Poly(arr)S
-
+	Poly(lastnterms(p, 30))
 end
 
 
@@ -650,6 +727,28 @@ function Main3() #testing for if you can calculate terms separately
 
 end
 
+
+# ╔═╡ 35bfd2b6-0acc-4e1d-bfb1-6d7106e0a142
+function Main1() # e
+	# Build your terms here, term(coeficient, x degree, xi degree)
+	C = term(1,0,2)
+	A = term(1,4,0)
+	B = term(-1,1,2)	
+	
+	#assemble it into an array 
+	arr = [C,A,B]
+	#p = DCTaylor(arr, B, 9)
+	#p2 = DCTaylor(arr, B, 10)
+	#Poly(p2)
+	p= TruncDCpickdegree(arr, 50,100)
+	#Poly(p)
+	#Poly(arr)
+	Poly(lastnterms(p, 10))
+end
+
+
+# ╔═╡ c3f01b38-044a-4bfe-bc51-0559831d7590
+Main1()
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -693,12 +792,15 @@ version = "1.3.1"
 # ╠═a4395194-877f-4aad-bde2-d92a09616dbb
 # ╠═11e415ae-3a88-4f5a-81d1-8da8c0c41048
 # ╠═b03b364e-3c7f-46aa-b6b7-7b4eb16e1412
+# ╠═5d8f4663-90eb-4f5e-a817-a39c61102cf6
 # ╠═8240db49-5fa2-4dcb-b808-30878c3dc1c5
 # ╠═89ffed51-2842-46d7-96b7-e67ba44a6eec
+# ╠═c25781a6-e3bc-4cb7-98be-31112db65e18
 # ╠═cb2c203d-abd9-4eed-b9f3-2c645e14a171
 # ╠═5855996d-676d-4c23-8522-dcbe550bd278
 # ╠═78b1d53b-b859-4cf7-96d9-97c6f5510909
 # ╠═dff3fbb3-5510-4fd1-82a7-8e540b8e73d3
+# ╠═24db735f-0186-4b57-9932-6979b00b9d6e
 # ╟─c342c6f1-5737-4617-9341-332ed6cfcdef
 # ╠═bd799c26-57c6-4fb7-906c-ef200c047638
 # ╟─4ca3155f-93cb-45d1-b2d1-1db3f1ed611c
@@ -706,8 +808,10 @@ version = "1.3.1"
 # ╠═cb236f21-a215-468d-b05c-8b0cc11bfd83
 # ╠═f22cde20-e89c-4e09-b19d-75235d59983d
 # ╠═92aff3ec-89e2-4940-bd1d-6a8fd997ea6a
-# ╟─0482deeb-e496-4b7e-b55e-2120f4f23b95
+# ╠═0482deeb-e496-4b7e-b55e-2120f4f23b95
 # ╠═674b60e2-6f17-4c8f-b63f-c29001c1f533
 # ╟─fced6cb5-5c6d-4b4d-a177-f73f23ef7d0d
+# ╠═35bfd2b6-0acc-4e1d-bfb1-6d7106e0a142
+# ╠═c3f01b38-044a-4bfe-bc51-0559831d7590
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
