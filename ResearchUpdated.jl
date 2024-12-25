@@ -394,6 +394,17 @@ function lastnterms(arr,n)
 	return holder
 end
 
+# ╔═╡ e0ec9fa1-709b-432b-88b5-7de2d51e0c00
+function firstnterms(arr,n)
+	holder = []
+	i = 1
+	while i <= n
+		push!(holder, arr[i])
+		i+=1
+	end	
+	return holder
+end
+
 # ╔═╡ 5855996d-676d-4c23-8522-dcbe550bd278
 function directCoef(termy,n,a,q,r)
 	x = termy.x
@@ -661,9 +672,9 @@ function Main5()
 	#p2 = DCTaylor(arr, B, 10)
 	#Poly(p2)
 	p= TruncDCpickdegree(arr, 7,6)
-	#Poly(p)
+	Poly(p)
 	#Poly(arr)
-	Poly(lastnterms(p, 30))
+	#Poly(lastnterms(p, 30))
 end
 
 
@@ -729,7 +740,7 @@ end
 
 
 # ╔═╡ 35bfd2b6-0acc-4e1d-bfb1-6d7106e0a142
-function Main1() # e
+function Main1() # xi^2+x^4+\xi^2x
 	# Build your terms here, term(coeficient, x degree, xi degree)
 	C = term(1,0,2)
 	A = term(1,4,0)
@@ -740,10 +751,11 @@ function Main1() # e
 	#p = DCTaylor(arr, B, 9)
 	#p2 = DCTaylor(arr, B, 10)
 	#Poly(p2)
-	p= TruncDCpickdegree(arr, 50,100)
-	#Poly(p)
+	#p= TruncDCpickdegree(arr, 28,40)
+	p = DCpickdegree(arr, 3, 50)
+	Poly(p)
 	#Poly(arr)
-	Poly(lastnterms(p, 10))
+	#Poly(firstnterms(p, 30))
 end
 
 
@@ -797,6 +809,7 @@ version = "1.3.1"
 # ╠═89ffed51-2842-46d7-96b7-e67ba44a6eec
 # ╠═c25781a6-e3bc-4cb7-98be-31112db65e18
 # ╠═cb2c203d-abd9-4eed-b9f3-2c645e14a171
+# ╠═e0ec9fa1-709b-432b-88b5-7de2d51e0c00
 # ╠═5855996d-676d-4c23-8522-dcbe550bd278
 # ╠═78b1d53b-b859-4cf7-96d9-97c6f5510909
 # ╠═dff3fbb3-5510-4fd1-82a7-8e540b8e73d3
